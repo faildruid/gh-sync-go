@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  gh-sync:
+    build: .
+    image: gh-sync-go
+    command: ["-c", "/config/config.yaml"]
+    volumes:
+      - ./config.yaml:/config/config.yaml:ro
+      - ./keys:/keys:ro
