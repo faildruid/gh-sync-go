@@ -58,11 +58,12 @@ func runGitImpl(args []string, cwd string) error {
 	return nil
 }
 
-var MirrorRepo = func(repo string, cfg *config.SyncConfig) error {
+// mirrorRepo is the internal implementation so tests can replace it through mirrorRepoImpl.
+func mirrorRepo(mapping config.RepoMapping, cfg *config.SyncConfig) error {
 	if err := os.MkdirAll(cfg.WorkDir, 0o755); err != nil {
 		return fmt.Errorf("create work_dir: %w", err)
 	}
-	repoDir := filepath.Join(cfg.WorkDir, repo+".git")
+	repoDir := filepath.Join(cfg.WorkDir, mapping.Source+".git")
 
 	if _, err := os.Stat(repoDir); err == nil {
 		if err := os.RemoveAll(repoDir); err != nil {
@@ -84,11 +85,11 @@ var MirrorRepo = func(repo string, cfg *config.SyncConfig) error {
 		return fmt.Errorf("create target installation token: %w", err)
 	}
 
-	sourceURL, err := buildGitURL(cfg.Source, repo, sourceToken)
+	sourceURL, err := buildGitURL(cfg.Source, mapping.Source, sourceToken)
 	if err != nil {
 		return err
 	}
-	targetURL, err := buildGitURL(cfg.Target, repo, targetToken)
+	targetURL, err := buildGitURL(cfg.Target, mapping.Target, targetToken)
 	if err != nil {
 		return err
 	}
@@ -103,9 +104,16 @@ var MirrorRepo = func(repo string, cfg *config.SyncConfig) error {
 	return nil
 }
 
+var mirrorRepoImpl = mirrorRepo
+
+// MirrorRepo is the exported function that mirrors a single mapping.
+func MirrorRepo(mapping config.RepoMapping, cfg *config.SyncConfig) error {
+	return mirrorRepo(mapping, cfg)
+}
+
 func MirrorAll(cfg *config.SyncConfig) error {
-	for _, repo := range cfg.Repos {
-		if err := MirrorRepo(repo, cfg); err != nil {
+	for _, mapping := range cfg.Repos {
+		if err := mirrorRepoImpl(mapping, cfg); err != nil {
 			return err
 		}
 	}

@@ -9,26 +9,40 @@ import (
 	"github.com/faildruid/gh-sync-go/internal/mirror"
 )
 
+// Variables for testing
+var (
+	mirrorAllFunc = func(cfg *config.SyncConfig) error {
+		return mirror.MirrorAll(cfg)
+	}
+	runFunc = run
+	osExit  = os.Exit
+)
+
 func run() error {
+	// Create a new FlagSet for testability
+	fs := flag.NewFlagSet("gh-sync", flag.ContinueOnError)
 	var configPath string
-	flag.StringVar(&configPath, "config", "config.yaml", "path to config.yaml")
-	flag.StringVar(&configPath, "c", "config.yaml", "path to config.yaml (short)")
-	flag.Parse()
+	fs.StringVar(&configPath, "config", "config.yaml", "path to config.yaml")
+	fs.StringVar(&configPath, "c", "config.yaml", "path to config.yaml (short)")
+
+	if err := fs.Parse(os.Args[1:]); err != nil {
+		return fmt.Errorf("parse flags: %w", err)
+	}
 
 	cfg, err := config.Load(configPath)
 	if err != nil {
 		return fmt.Errorf("load config: %w", err)
 	}
 
-	if err := mirror.MirrorAll(cfg); err != nil {
+	if err := mirrorAllFunc(cfg); err != nil {
 		return fmt.Errorf("mirror: %w", err)
 	}
 	return nil
 }
 
 func main() {
-	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v", err)
-		os.Exit(1)
+	if err := runFunc(); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		osExit(1)
 	}
 }

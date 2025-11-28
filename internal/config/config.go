@@ -17,10 +17,15 @@ type GitHubInstanceConfig struct {
 	Org            string `yaml:"org"`
 }
 
+type RepoMapping struct {
+	Source string `yaml:"source"`
+	Target string `yaml:"target"`
+}
+
 type SyncConfig struct {
 	Source  GitHubInstanceConfig `yaml:"source"`
 	Target  GitHubInstanceConfig `yaml:"target"`
-	Repos   []string             `yaml:"repos"`
+	Repos   []RepoMapping        `yaml:"repos"`
 	WorkDir string               `yaml:"work_dir"`
 }
 
@@ -29,8 +34,8 @@ type rootConfig struct {
 		Source GitHubInstanceConfig `yaml:"source"`
 		Target GitHubInstanceConfig `yaml:"target"`
 	} `yaml:"github"`
-	Repos   []string `yaml:"repos"`
-	WorkDir string   `yaml:"work_dir"`
+	Repos   []RepoMapping `yaml:"repos"`
+	WorkDir string        `yaml:"work_dir"`
 }
 
 func Load(path string) (*SyncConfig, error) {
@@ -50,6 +55,11 @@ func Load(path string) (*SyncConfig, error) {
 
 	if len(rc.Repos) == 0 {
 		return nil, fmt.Errorf("repos list must not be empty")
+	}
+	for i, m := range rc.Repos {
+		if m.Source == "" || m.Target == "" {
+			return nil, fmt.Errorf("repos[%d] must have source and target", i)
+		}
 	}
 
 	workDir := rc.WorkDir

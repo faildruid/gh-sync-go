@@ -59,8 +59,3 @@ docker-run:
 		$(IMAGE_NAME) \
 		-c /config/config.yaml
 
-.PHONY: publish
-publish:
-	@echo "Tagging and pushing Docker image to $(REGISTRY)..."
-	docker tag $(IMAGE_NAME) $(REGISTRY)
-	docker push $(REGISTRY)
