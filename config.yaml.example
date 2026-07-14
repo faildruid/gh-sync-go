@@ -1,0 +1,28 @@
+github:
+  source:
+    api_url: "https://github.source.int/api/v3"
+    git_url: "https://github.source.int"
+    app_id: 12345
+    installation_id: 1111
+    private_key_path: "/keys/source_app_private_key.pem"
+    org: "org1"
+
+  target:
+    api_url: "https://github.target.int/api/v3"
+    git_url: "https://github.target.int"
+    app_id: 23456
+    installation_id: 2222
+    private_key_path: "/keys/target_app_private_key.pem"
+    org: "org2"
+
+repos:
+  - source: "fred"
+    target: "fred"  
+  - source: "barney"
+    target: "barney"
+  - source: "wilma"
+    target: "wilma"
+  - source: "betty"
+    target: "betty"
+
+work_dir: "/tmp/repos"
